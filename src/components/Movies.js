@@ -10,7 +10,7 @@ class Movies extends React.Component {
     return (
         <div>
             <h2>{this.props.movies.original_title}</h2>
-            {this.props.movies.backdrop_path?<Link to={`/id=${this.props.movies.id}`}><img alt='movies' src={`https://image.tmdb.org/t/p/w500${this.props.movies.backdrop_path}`} /></Link>:<div/>}
+            {this.props.movies.backdrop_path?<Link to={`/movies/${this.props.movies.original_title}?id=${this.props.movies.id}`}><img alt='movies' src={`https://image.tmdb.org/t/p/w500${this.props.movies.backdrop_path}`} /></Link>:<div/>}
         </div>
     );
   }

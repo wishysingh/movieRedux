@@ -26,8 +26,8 @@ class App extends React.Component {
         <Switch>
           <div>
             <Route exact path="/" component={SearchPage} />
-            <Route exact path="/:movies/:page" component={SearchPage} />
-            <Route exact path="/id=:id" component={Details} />
+            <Route exact path="/:movies" component={SearchPage} />
+            <Route exact path="/movies/:movieName" component={Details} />
           </div>
         </Switch>
       </BrowserRouter>

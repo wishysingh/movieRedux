@@ -1,10 +1,13 @@
 /* eslint-disable import/no-named-as-default */
 import React from "react";
+import PropTypes from "prop-types";
+import queryString from 'query-string';
 import Searchbox from "./SearchBox";
 import MoviesList from "./MoviesList";
 import NextPageButton from "./NextPageButton";
 import Loader from "./Loader";
 import PrevPageButton from "./PrevPageButton";
+import { movieListApi, searchList } from "../constants/apiEndpoints";
 
 // This is a class-based component because the current
 // version of hot reloading won't hot reload a stateless
@@ -22,49 +25,26 @@ class SearchPage extends React.Component {
     };
   }
   componentDidMount() {
-    if(this.props.match.params.movies===undefined)
-    {
-      this.setState({
-        loader:true,
-        renderapi:"https://api.themoviedb.org/3/movie/top_rated?api_key=4d3775d97a83b11d700345ad71b1e238&language=en-US&page="
-      },()=>{fetch(this.state.renderapi)
-        .then(res => res.json())
-        .then(res => {
-          this.setState({
-            loader:false,
-            movies:res.results,
-            maxpage:res.total_pages
-          });
-        })
-        .catch(err => {err});});
-
-    }
-    else{
-      this.setState(
-        {
-          loader: true,
-          renderapi: `https://api.themoviedb.org/3/search/movie?api_key=4d3775d97a83b11d700345ad71b1e238&query=${
-            this.state.searchtext
-          }&language=en-US&page=1&include_adult=false&page=`
-        },
-        () => {
-          fetch(this.state.renderapi + this.props.match.params.page)
-            .then(res => res.json())
-            .then(res => {
-              this.setState({
-                loader: false,
-                movies: res.results,
-                maxpage: res.total_pages
-              });
-            })
-            .catch(err => {
-              err;
+    this.setState(
+      {
+        loader: true,
+        renderapi: !this.props.match.params.movies ? movieListApi : searchList(this.state.searchtext)
+      },
+      () => {
+        fetch(this.state.renderapi + queryString.parse(this.props.location.search).pageNo)
+          .then(res => res.json())
+          .then(res => {
+            this.setState({
+              loader: false,
+              movies: res.results,
+              maxpage: res.total_pages
             });
-        }
-      );
-    }
-
-
+          })
+          .catch(err => {
+            err;
+          });
+      }
+    );
   }
   onSearchChange(event) {
     this.setState({
@@ -72,66 +52,39 @@ class SearchPage extends React.Component {
     });
   }
   onSearchClick() {
-
-    this.props.history.push(`/${this.state.searchtext}/1`);
-    if (this.state.searchtext) {
-      this.setState(
-        {
-          loader: true,
-          renderapi: `https://api.themoviedb.org/3/search/movie?api_key=4d3775d97a83b11d700345ad71b1e238&query=${
-            this.state.searchtext
-          }&language=en-US&page=1&include_adult=false&page=`
-        },
-        () => {
-          fetch(this.state.renderapi + this.state.page)
-            .then(res => res.json())
-            .then(res => {
-              this.setState({
-                loader: false,
-                movies: res.results,
-                maxpage: res.total_pages
-              });
-            })
-            .catch(err => {
-              err;
-            });
-        }
-      );
-    } else {
-      this.setState(
-        {
-          loader: true,
-          renderapi:
-            "https://api.themoviedb.org/3/movie/top_rated?api_key=4d3775d97a83b11d700345ad71b1e238&language=en-US&page="
-        },
-        () => {
-          fetch(this.state.renderapi + this.state.page)
-            .then(res => res.json())
-            .then(res => {
-              this.setState({
-                loader: false,
-                movies: res.results,
-                maxpage: res.total_pages
-              });
-            })
-            .catch(err => {
-              err;
-            });
-        }
-      );
-    }
-  }
-  next() {
-    let no = Number(this.props.match.params.page);
-    let num=no+1;
-    this.props.history.push(`/${this.props.match.params.movies}/${num}`);
+    this.props.history.push(`/${this.state.searchtext}?pageNo=1`);
     this.setState(
       {
-        page:this.state.page+1,
+        loader: true,
+        renderapi: this.state.searchtext ? searchList(this.state.searchtext) : movieListApi
+      },
+      () => {
+        fetch(this.state.renderapi + this.state.page)
+          .then(res => res.json())
+          .then(res => {
+            this.setState({
+              loader: false,
+              movies: res.results,
+              maxpage: res.total_pages
+            });
+          })
+          .catch(err => {
+            err;
+          });
+      }
+    );
+  }
+  next() {
+    let no = Number(queryString.parse(this.props.location.search).pageNo);
+    let num = no + 1;
+    this.props.history.push(`/${this.props.match.params.movies}?pageNo=${num}`);
+    this.setState(
+      {
+        page: this.state.page + 1,
         loader: true
       },
       () => {
-        fetch(this.state.renderapi + this.props.match.params.page)
+        fetch(this.state.renderapi + queryString.parse(this.props.location.search).pageNo)
           .then(res => res.json())
           .then(res => {
             this.setState({
@@ -146,15 +99,15 @@ class SearchPage extends React.Component {
     );
   }
   prev() {
-    let no = Number(this.props.match.params.page);
-    let num= no-1;
-    this.props.history.push(`/${this.props.match.params.movies}/${num}`);
+    let no = Number(queryString.parse(this.props.location.search).pageNo);
+    let num = no - 1;
+    this.props.history.push(`/${this.props.match.params.movies}?pageNo=${num}`);
     this.setState(
       {
         loader: true
       },
       () => {
-        fetch(this.state.renderapi + this.props.match.params.page)
+        fetch(this.state.renderapi + queryString.parse(this.props.location.search).pageNo)
           .then(res => res.json())
           .then(res => {
             this.setState({
@@ -171,37 +124,39 @@ class SearchPage extends React.Component {
   render() {
     return (
       <div>
-        {this.state.loader ? <Loader /> : <div />}
-        {!this.state.loader ? (
-          <Searchbox
-            searchChange={this.onSearchChange.bind(this)}
-            searchClick={this.onSearchClick.bind(this)}
-          />
+        {this.state.loader ? (
+          <Loader />
         ) : (
-          <div />
-        )}
-        {this.state.movies && !this.state.loader ? (
-          <MoviesList movies={this.state.movies} url={this.props.match.params}/>
-        ) : (
-          <div />
-        )}
-        {this.state.movies &&
-        !this.state.loader &&
-        this.state.maxpage > Number(this.props.match.params.page) ? (
-          <NextPageButton next={this.next.bind(this)} />
-        ) : (
-          <div />
-        )}
-        {this.state.movies &&
-        !this.state.loader &&
-        1 < Number(this.props.match.params.page) ? (
-          <PrevPageButton prev={this.prev.bind(this)} />
-        ) : (
-          <div />
+          <div>
+            <Searchbox
+              searchChange={this.onSearchChange.bind(this)}
+              searchClick={this.onSearchClick.bind(this)}
+            />
+            {this.state.movies && (
+              <div>
+                <MoviesList
+                  movies={this.state.movies}
+                  url={this.props.match.params}
+                />
+                {this.state.maxpage > Number(queryString.parse(this.props.location.search).pageNo) && (
+                  <NextPageButton next={this.next.bind(this)} />
+                )}
+                {1 < Number(queryString.parse(this.props.location.search).pageNo) && (
+                  <PrevPageButton prev={this.prev.bind(this)} />
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
     );
   }
 }
+
+SearchPage.propTypes = {
+  match: PropTypes.object,
+  history: PropTypes.object,
+  location: PropTypes.string
+};
 
 export default SearchPage;

@@ -1,5 +1,7 @@
 import React from 'react';
+import PropTypes from "prop-types";
 import Loader from "./Loader";
+import queryString from 'query-string';
 
 class Details extends React.Component{
   constructor(props) {
@@ -11,11 +13,10 @@ class Details extends React.Component{
 
   }
 
- componentDidMount(){
-   console.log(this.props.match.params.id);
+ componentDidMount() {
   this.setState({
     loader:true,
-  },()=>{fetch(`https://api.themoviedb.org/3/movie/${this.props.match.params.id}?api_key=4d3775d97a83b11d700345ad71b1e238&language=en-US`)
+  },()=>{fetch(`https://api.themoviedb.org/3/movie/${queryString.parse(this.props.location.search).id}?api_key=4d3775d97a83b11d700345ad71b1e238&language=en-US`)
     .then(res => res.json())
     .then(res => {
       this.setState({
@@ -27,7 +28,6 @@ class Details extends React.Component{
  }
 
   render(){
-    console.log(this.props);
     return (
       <div>
         {this.state.loader ? <Loader /> :
@@ -49,5 +49,8 @@ class Details extends React.Component{
 
 }
 
+Details.propTypes = {
+  match: PropTypes.object
+};
 
 export default Details;

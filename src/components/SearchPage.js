@@ -8,71 +8,65 @@ import NextPageButton from "./NextPageButton";
 import Loader from "./Loader";
 import PrevPageButton from "./PrevPageButton";
 import { movieListApi, searchList } from "../constants/apiEndpoints";
+import {connect} from 'react-redux';
+import { apicall, searchChange, initialState } from '../actions/searchActions';
 
 // This is a class-based component because the current
 // version of hot reloading won't hot reload a stateless
 // component at the top-level.
 
+const mapStateToProps = (state) => {
+  return{
+      searchtext: state.searchingMovies.searchtext,
+      movies: state.searchingMovies.movies,
+      maxpage: state.searchingMovies.maxpage
+  }
+}
+const mapDispatchToProps = (dispatch) => {
+  return {
+      onSearchChange: (event)=>dispatch(searchChange(event)),
+      initialState: (text)=>dispatch(initialState(text)),
+      apicall: (text)=>dispatch(apicall(text))
+  }
+}
+
 class SearchPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchtext: this.props.match.params.movies,
-      movies: [],
-      maxpage: 1,
       renderapi: "",
       loader: false
     };
+  }
+  componentWillMount(){
+    this.props.initialState(this.props.match.params.movies);
   }
   componentDidMount() {
     this.setState(
       {
         loader: true,
-        renderapi: !this.props.match.params.movies ? movieListApi : searchList(this.state.searchtext)
-      },
-      () => {
-        fetch(this.state.renderapi + queryString.parse(this.props.location.search).pageNo)
-          .then(res => res.json())
-          .then(res => {
-            this.setState({
-              loader: false,
-              movies: res.results,
-              maxpage: res.total_pages
-            });
-          })
-          .catch(err => {
-            err;
-          });
-      }
+        renderapi: !this.props.match.params.movies ? movieListApi : searchList(this.props.searchtext)
+      },() => {
+      this.props.apicall(this.state.renderapi+queryString.parse(this.props.location.search).pageNo)}
     );
-  }
-  onSearchChange(event) {
-    this.setState({
-      searchtext: event.target.value
-    });
+    this.setState(
+      {
+        loader:false
+      });
   }
   onSearchClick() {
-    this.props.history.push(`/${this.state.searchtext}?pageNo=1`);
+    this.props.history.push(`/${this.props.searchtext}?pageNo=1`);
     this.setState(
       {
         loader: true,
-        renderapi: this.state.searchtext ? searchList(this.state.searchtext) : movieListApi
-      },
-      () => {
-        fetch(this.state.renderapi + this.state.page)
-          .then(res => res.json())
-          .then(res => {
-            this.setState({
-              loader: false,
-              movies: res.results,
-              maxpage: res.total_pages
-            });
-          })
-          .catch(err => {
-            err;
-          });
-      }
+        renderapi: this.props.searchtext ? searchList(this.props.searchtext) : movieListApi
+      },() => {
+      this.props.apicall(this.state.renderapi )}
     );
+    this.setState(
+      {
+        loader:false
+      });
   }
   next() {
     let no = Number(queryString.parse(this.props.location.search).pageNo);
@@ -80,23 +74,14 @@ class SearchPage extends React.Component {
     this.props.history.push(`/${this.props.match.params.movies}?pageNo=${num}`);
     this.setState(
       {
-        page: this.state.page + 1,
         loader: true
-      },
-      () => {
-        fetch(this.state.renderapi + queryString.parse(this.props.location.search).pageNo)
-          .then(res => res.json())
-          .then(res => {
-            this.setState({
-              loader: false,
-              movies: res.results
-            });
-          })
-          .catch(err => {
-            err;
-          });
-      }
+      },() => {
+      this.props.apicall(this.state.renderapi+queryString.parse(this.props.location.search).pageNo)}
     );
+    this.setState(
+      {
+        loader:false
+      });
   }
   prev() {
     let no = Number(queryString.parse(this.props.location.search).pageNo);
@@ -105,21 +90,13 @@ class SearchPage extends React.Component {
     this.setState(
       {
         loader: true
-      },
-      () => {
-        fetch(this.state.renderapi + queryString.parse(this.props.location.search).pageNo)
-          .then(res => res.json())
-          .then(res => {
-            this.setState({
-              loader: false,
-              movies: res.results
-            });
-          })
-          .catch(err => {
-            err;
-          });
-      }
+      },() => {
+      this.props.apicall(this.state.renderapi+queryString.parse(this.props.location.search).pageNo)}
     );
+    this.setState(
+      {
+        loader:false
+      });
   }
   render() {
     return (
@@ -129,16 +106,16 @@ class SearchPage extends React.Component {
         ) : (
           <div>
             <Searchbox
-              searchChange={this.onSearchChange.bind(this)}
+              searchChange={this.props.onSearchChange}
               searchClick={this.onSearchClick.bind(this)}
             />
-            {this.state.movies && (
+            {this.props.movies && (
               <div>
                 <MoviesList
-                  movies={this.state.movies}
+                  movies={this.props.movies}
                   url={this.props.match.params}
                 />
-                {this.state.maxpage > Number(queryString.parse(this.props.location.search).pageNo) && (
+                {this.props.maxpage > Number(queryString.parse(this.props.location.search).pageNo) && (
                   <NextPageButton next={this.next.bind(this)} />
                 )}
                 {1 < Number(queryString.parse(this.props.location.search).pageNo) && (
@@ -159,4 +136,4 @@ SearchPage.propTypes = {
   location: PropTypes.string
 };
 
-export default SearchPage;
+export default connect(mapStateToProps, mapDispatchToProps)(SearchPage);

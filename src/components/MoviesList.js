@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Movies from './Movies';
+import PropTypes from "prop-types";
 
 const MoviesList = ({movies,url}) => {
     const moviecomponent = movies.map((user,i) => {
@@ -15,3 +16,8 @@ const MoviesList = ({movies,url}) => {
 }
 
 export default MoviesList;
+
+MoviesList.propTypes = {
+  movies: PropTypes.object,
+  url: PropTypes.object
+};

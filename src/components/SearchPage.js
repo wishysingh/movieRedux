@@ -38,7 +38,7 @@ class SearchPage extends React.Component {
       loader: false
     };
   }
-  
+
   componentDidMount() {
     this.setState(
       {
@@ -59,7 +59,10 @@ class SearchPage extends React.Component {
     });
   }
   onSearchClick() {
+    if(this.props.searchtext)
     this.props.history.push(`/${this.props.searchtext}?pageNo=1`);
+    else
+    this.props.history.push('/');
     this.setState(
       {
         loader: true,
@@ -123,6 +126,7 @@ class SearchPage extends React.Component {
             <Searchbox
               searchChange={this.props.onSearchChange}
               searchClick={this.onSearchClick.bind(this)}
+              placeholder={this.props.searchtext}
             />
             {this.props.movies && (
               <div>
@@ -150,7 +154,13 @@ class SearchPage extends React.Component {
 SearchPage.propTypes = {
   match: PropTypes.object,
   history: PropTypes.object,
-  location: PropTypes.object
+  location: PropTypes.object,
+  apicall: PropTypes.func,
+  searchtext: PropTypes.string,
+  onSearchChange: PropTypes.func,
+  movies: PropTypes.object,
+  maxpage: PropTypes.number
+
 };
 
 export default connect(

@@ -79,7 +79,8 @@ class Details extends React.Component {
 
 Details.propTypes = {
   movies: PropTypes.object,
-  location: PropTypes.object
+  location: PropTypes.object,
+  apicall: PropTypes.func
 };
 
 export default connect(

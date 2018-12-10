@@ -38,19 +38,7 @@ class SearchPage extends React.Component {
       loader: false
     };
   }
-  shouldComponentUpdate() {
-    if (this.props.match.params.movies) {
-      console.log('123');
-      this.props.initialState(this.props.match.params.movies);
-    }
-    return this.props.match.params.movies !== "";
-  }
-  componentWillMount() {
-    if (this.props.match.params.movies) {
-      console.log('1234');
-      this.props.initialState(this.props.match.params.movies);
-    }
-  }
+  
   componentDidMount() {
     this.setState(
       {
@@ -126,7 +114,6 @@ class SearchPage extends React.Component {
     });
   }
   render() {
-    console.log('aq', this.props);
     return (
       <div>
         {this.state.loader ? (
@@ -163,7 +150,7 @@ class SearchPage extends React.Component {
 SearchPage.propTypes = {
   match: PropTypes.object,
   history: PropTypes.object,
-  location: PropTypes.string
+  location: PropTypes.object
 };
 
 export default connect(

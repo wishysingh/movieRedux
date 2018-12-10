@@ -1,11 +1,10 @@
-const initialStateContact = {
+const initialStateSearch = {
     searchtext:'',
     movies:[],
     maxpage:1
 }
 
-export const searchReducer = (state=initialStateContact, action={})=>{
-    console.log(action, 'aas');
+export const searchReducer = (state=initialStateSearch, action={})=>{
     switch(action.type){
         case "Search_Change" :
         return Object.assign({},state,{searchtext:action.payload});
@@ -15,5 +14,5 @@ export const searchReducer = (state=initialStateContact, action={})=>{
         return Object.assign({},state,{movies:action.payload1,maxpage:action.payload2});
         default:
         return state
-    }   
+    }
 }

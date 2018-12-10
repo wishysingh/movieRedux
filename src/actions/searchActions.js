@@ -1,7 +1,6 @@
 
 import axios from 'axios';
 export function apicall(text) {
-    console.log('aw', text);
     return function(dispatch) {
         axios.get(text).then(res => {
         dispatch ({
@@ -22,8 +21,7 @@ export function searchChange(event){
 
 
 export function initialState(text){
-    console.log(text,"su");
-    
+
     return {
         type: "Initial_State",
         payload: text
